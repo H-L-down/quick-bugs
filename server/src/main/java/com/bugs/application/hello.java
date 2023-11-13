@@ -1,4 +1,4 @@
-package com.bugs.server.application;
+package com.bugs.application;
 
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
