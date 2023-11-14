@@ -6,7 +6,9 @@
 				<a-timeline mode="right">
 					<a-timeline-item v-for="e in 20" @click="test">2015-09-0{{e + 1}}</a-timeline-item>
 				</a-timeline>
-				<div class="white-box"></div>
+				<div class="white-box">
+
+                </div>
 			</div>
 			<div class="top-mask"></div>
 			<div class="bottom-mask"></div>
@@ -19,10 +21,11 @@
 		<div
 			class="content-box"
 			ref="content-box"
-			v-grid-drag
+            @mousedown="dragEvent($event)"
 		>
-			<div></div>
+			<div class="content">sadasd</div>
 		</div>
+        <button @click="() => { isMove = !isMove }"></button>
     </div>
 </template>
 
@@ -32,70 +35,72 @@ export default {
     name: 'home',
     components: {},
 	data() {
-        return {};
+        return {
+            isMove: true
+        };
     },
 	directives: {
 		'grid-drag': {
 			bind: function (el, binding, vnode) {
-				el.onmousedown = function (event) {
-					const style = window.getComputedStyle(el);
-					const minX = window.innerWidth / 40;
-					const minY = window.innerHeight / 40;
-					const mouseX = event.pageX;
-					const mouseY = event.pageY;
-					let row = style['grid-row'].split(' ').filter(el => el !== '/').map(el => Number(el));
-					let col = style['grid-column'].split(' ').filter(el => el !== '/').map(el => Number(el));
-					const top = (row[0] - 1) * minY;
-					const left = (col[0] - 1) * minX;
-					const width = (col[1] - col[0]) * minX;
-					const height = (row[1] - row[0]) * minY;
-					let bgDOM = document.getElementsByClassName('drag-bg')[0];
-					let bgLine = document.getElementsByClassName('drag-line')[0];
-					let bgLine1 = document.getElementsByClassName('drag-line-1')[0];
-					el.style.width = width + 'px';
-					el.style.height = height + 'px';
-					el.style.position = 'absolute';
-					el.style.top = top + 'px';
-					el.style.left = left + 'px';
-					bgDOM.style.width = width + 'px';
-					bgDOM.style.height = height + 'px';
-					bgDOM.style.gridRow = style['grid-row'];
-					bgDOM.style.gridColumn = style['grid-column'];
-					bgDOM.className += ' out';
-					bgLine.style.backgroundSize = '6px ' + height + 'px';
-					bgLine1.style.backgroundSize = width + 'px' + ' 6px';
-					document.onmousemove = function (event) {
-						let nextY = top + event.pageY - mouseY;
-						let nextX = left + event.pageX - mouseX;
-						if (nextY <= 0) {
-							nextY = 0;
-						}
-						if (nextY >= (window.innerHeight - height)) {
-							nextY = window.innerHeight - height;
-						}
-						if (nextX <= window.innerWidth * 0.25) {
-							nextX = window.innerWidth * 0.25;
-						}
-						if (nextX >= (window.innerWidth - width)) {
-							nextX = window.innerWidth - width;
-						}
-						el.style.top = nextY + 'px';
-						el.style.left = nextX + 'px';
-						let rowNum = Math.round(nextY / minY) + 1;
-						let colNum = Math.round(nextX / minX) + 1;
-						bgDOM.style.gridRow = rowNum + ' / ' + (row[1] + rowNum - row[0]);
-						bgDOM.style.gridColumn = colNum + ' / ' + (col[1] + colNum - col[0]);
-						el.style.gridRow = rowNum + ' / ' + (row[1] + rowNum - row[0]);
-						el.style.gridColumn = colNum + ' / ' + (col[1] + colNum - col[0]);
-					}
-					document.onmouseup = function (event) {
-						el.style.position = 'static';
-						bgDOM.className = 'drag-bg';
-						document.onmousemove = document.onmouseup = null;
-						bgLine.style.backgroundSize = '';
-						bgLine1.style.backgroundSize = '';
-					}
-				}
+                el.onmousedown = function dragEvent (event) {
+                    const style = window.getComputedStyle(el);
+                    const minX = window.innerWidth / 40;
+                    const minY = window.innerHeight / 40;
+                    const mouseX = event.pageX;
+                    const mouseY = event.pageY;
+                    let row = style['grid-row'].split(' ').filter(el => el !== '/').map(el => Number(el));
+                    let col = style['grid-column'].split(' ').filter(el => el !== '/').map(el => Number(el));
+                    const top = (row[0] - 1) * minY;
+                    const left = (col[0] - 1) * minX;
+                    const width = (col[1] - col[0]) * minX;
+                    const height = (row[1] - row[0]) * minY;
+                    let bgDOM = document.getElementsByClassName('drag-bg')[0];
+                    let bgLine = document.getElementsByClassName('drag-line')[0];
+                    let bgLine1 = document.getElementsByClassName('drag-line-1')[0];
+                    el.style.width = width + 'px';
+                    el.style.height = height + 'px';
+                    el.style.position = 'absolute';
+                    el.style.top = top + 'px';
+                    el.style.left = left + 'px';
+                    bgDOM.style.width = width + 'px';
+                    bgDOM.style.height = height + 'px';
+                    bgDOM.style.gridRow = style['grid-row'];
+                    bgDOM.style.gridColumn = style['grid-column'];
+                    bgDOM.className += ' out';
+                    bgLine.style.backgroundSize = '6px ' + height + 'px';
+                    bgLine1.style.backgroundSize = width + 'px' + ' 6px';
+                    document.onmousemove = function (event) {
+                        let nextY = top + event.pageY - mouseY;
+                        let nextX = left + event.pageX - mouseX;
+                        if (nextY <= 0) {
+                            nextY = 0;
+                        }
+                        if (nextY >= (window.innerHeight - height)) {
+                            nextY = window.innerHeight - height;
+                        }
+                        if (nextX <= window.innerWidth * 0.25) {
+                            nextX = window.innerWidth * 0.25;
+                        }
+                        if (nextX >= (window.innerWidth - width)) {
+                            nextX = window.innerWidth - width;
+                        }
+                        el.style.top = nextY + 'px';
+                        el.style.left = nextX + 'px';
+                        let rowNum = Math.round(nextY / minY) + 1;
+                        let colNum = Math.round(nextX / minX) + 1;
+                        bgDOM.style.gridRow = rowNum + ' / ' + (row[1] + rowNum - row[0]);
+                        bgDOM.style.gridColumn = colNum + ' / ' + (col[1] + colNum - col[0]);
+                        el.style.gridRow = rowNum + ' / ' + (row[1] + rowNum - row[0]);
+                        el.style.gridColumn = colNum + ' / ' + (col[1] + colNum - col[0]);
+                    }
+                    document.onmouseup = function (event) {
+                        el.style.position = 'static';
+                        bgDOM.className = 'drag-bg';
+                        document.onmousemove = document.onmouseup = null;
+                        bgLine.style.backgroundSize = '';
+                        bgLine1.style.backgroundSize = '';
+                    }
+                }
 			}
 		}
 	},
@@ -104,9 +109,68 @@ export default {
 			console.log(11);
 			document.getElementsByClassName('content-box')[0].style.position = 'static';
 		},
-		dragEvent(e) {
-
-		}
+        dragEvent (event) {
+            if (this.isMove) {
+                let el = document.getElementsByClassName('content-box')[0];
+                const style = window.getComputedStyle(el);
+                const minX = window.innerWidth / 40;
+                const minY = window.innerHeight / 40;
+                const mouseX = event.pageX;
+                const mouseY = event.pageY;
+                let row = style['grid-row'].split(' ').filter(el => el !== '/').map(el => Number(el));
+                let col = style['grid-column'].split(' ').filter(el => el !== '/').map(el => Number(el));
+                const top = (row[0] - 1) * minY;
+                const left = (col[0] - 1) * minX;
+                const width = (col[1] - col[0]) * minX;
+                const height = (row[1] - row[0]) * minY;
+                let bgDOM = document.getElementsByClassName('drag-bg')[0];
+                let bgLine = document.getElementsByClassName('drag-line')[0];
+                let bgLine1 = document.getElementsByClassName('drag-line-1')[0];
+                el.style.width = width + 'px';
+                el.style.height = height + 'px';
+                el.style.position = 'absolute';
+                el.style.top = top + 'px';
+                el.style.left = left + 'px';
+                bgDOM.style.width = width + 'px';
+                bgDOM.style.height = height + 'px';
+                bgDOM.style.gridRow = style['grid-row'];
+                bgDOM.style.gridColumn = style['grid-column'];
+                bgDOM.className += ' out';
+                bgLine.style.backgroundSize = '6px ' + height + 'px';
+                bgLine1.style.backgroundSize = width + 'px' + ' 6px';
+                document.onmousemove = function (event) {
+                    let nextY = top + event.pageY - mouseY;
+                    let nextX = left + event.pageX - mouseX;
+                    if (nextY <= 0) {
+                        nextY = 0;
+                    }
+                    if (nextY >= (window.innerHeight - height)) {
+                        nextY = window.innerHeight - height;
+                    }
+                    if (nextX <= window.innerWidth * 0.25) {
+                        nextX = window.innerWidth * 0.25;
+                    }
+                    if (nextX >= (window.innerWidth - width)) {
+                        nextX = window.innerWidth - width;
+                    }
+                    el.style.top = nextY + 'px';
+                    el.style.left = nextX + 'px';
+                    let rowNum = Math.round(nextY / minY) + 1;
+                    let colNum = Math.round(nextX / minX) + 1;
+                    bgDOM.style.gridRow = rowNum + ' / ' + (row[1] + rowNum - row[0]);
+                    bgDOM.style.gridColumn = colNum + ' / ' + (col[1] + colNum - col[0]);
+                    el.style.gridRow = rowNum + ' / ' + (row[1] + rowNum - row[0]);
+                    el.style.gridColumn = colNum + ' / ' + (col[1] + colNum - col[0]);
+                }
+                document.onmouseup = function (event) {
+                    el.style.position = 'static';
+                    bgDOM.className = 'drag-bg';
+                    document.onmousemove = document.onmouseup = null;
+                    bgLine.style.backgroundSize = '';
+                    bgLine1.style.backgroundSize = '';
+                }
+            }
+        }
 	}
 };
 </script>
@@ -166,14 +230,15 @@ export default {
 		grid-row: 9 / 14;
 		grid-column: 13 / 18;
 		z-index: 4;
-		height: 12.5vh;
-		width: 12.5vw;
-		resize: both;
-		div {
-			width: 100%;
-			height: 100%;
-			background: #0a0a0a;
-			border-radius: 10px;
+        height: 12.5vh;
+        width: 12.5vw;
+		.content {
+            height: 100%;
+            width: 100%;
+            overflow: hidden;
+            resize: both;
+            border: 1px #000 solid;
+            background: #b6a9a9;
 		}
 	}
 	.out {
