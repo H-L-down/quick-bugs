@@ -1,7 +1,9 @@
 <template>
 	<div class="test-box">
+        <div>asdasd</div>
 		<grid-drag-layout :width="600" :height="600">
-            <grid-drag-item></grid-drag-item>
+            <grid-drag-item row="1 / 2" col="1 / 2"></grid-drag-item>
+            <grid-drag-item row="2 / 3" col="2 / 3"></grid-drag-item>
         </grid-drag-layout>
 	</div>
 </template>

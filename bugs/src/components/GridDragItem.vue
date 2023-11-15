@@ -13,9 +13,11 @@
         }"
         @mousedown="dragEvent($event)"
     >
-<!--        <div class="content">-->
-<!--            <slot></slot>-->
-<!--        </div>-->
+        <div class="content" @mousedown.stop="() => {}">
+            {{top}} {{left}} {{gridRow}} {{gridCol}}
+            <button @click="closeMove">close</button>
+            <slot></slot>
+        </div>
     </div>
 </template>
 
@@ -54,7 +56,6 @@ export default {
         this.gridCol = this.col;
         this.gridRow = this.row;
         this.$bus.$on('grid-drag-init', val => {
-            console.log(val);
             this.layoutHeight = val.height;
             this.layoutWidth = val.width;
             this.rows = val.rows;
@@ -75,55 +76,41 @@ export default {
     },
     methods: {
         dragEvent (event) {
-            console.log(event);
             if (this.isMove) {
-                console.log(event, '000');
                 const minX = this.layoutWidth / this.cols;
                 const minY = this.layoutHeight / this.cols;
-                const mouseX = event.pageX;
-                const mouseY = event.pageY;
+                const mouseX = event.clientX;
+                const mouseY = event.clientY;
                 let row = this.gridRow.split(' ').filter(el => el !== '/').map(el => Number(el));
                 let col = this.gridCol.split(' ').filter(el => el !== '/').map(el => Number(el));
                 const top = (row[0] - 1) * minY;
                 const left = (col[0] - 1) * minX;
-                const width = (col[1] - col[0]) * minX;
-                const height = (row[1] - row[0]) * minY;
-                // let bgDOM = document.getElementsByClassName('drag-bg')[0];
-                // let bgLine = document.getElementsByClassName('drag-line')[0];
-                // let bgLine1 = document.getElementsByClassName('drag-line-1')[0];
-                this.width = width;
-                this.height = height;
-                this.position = 'absolute';
                 this.top = top;
                 this.left = left;
-                // bgDOM.style.width = width + 'px';
-                // bgDOM.style.height = height + 'px';
-                // bgDOM.style.gridRow = style['grid-row'];
-                // bgDOM.style.gridColumn = style['grid-column'];
-                // bgDOM.className += ' out';
-                // bgLine.style.backgroundSize = '6px ' + height + 'px';
-                // bgLine1.style.backgroundSize = width + 'px' + ' 6px';
+                this.gridRow = '';
+                this.gridCol = '';
+                this.position = 'absolute';
+                this.$bus.$emit('grid-drag-show-line', { width: this.width, height: this.height });
                 let that = this;
+                console.log()
                 document.onmousemove = function (event) {
                     let nextY = top + event.pageY - mouseY;
                     let nextX = left + event.pageX - mouseX;
-                    // if (nextY <= 0) {
-                    //     nextY = 0;
-                    // }
-                    // if (nextY >= (window.innerHeight - height)) {
-                    //     nextY = window.innerHeight - height;
-                    // }
-                    // if (nextX <= window.innerWidth * 0.25) {
-                    //     nextX = window.innerWidth * 0.25;
-                    // }
-                    // if (nextX >= (window.innerWidth - width)) {
-                    //     nextX = window.innerWidth - width;
-                    // }
+                    if (nextY <= 0) {
+                        nextY = 0;
+                    }
+                    if (nextY >= (that.layoutHeight - that.height)) {
+                        nextY = that.layoutHeight - that.height;
+                    }
+                    if (nextX <= 0) {
+                        nextX = 0;
+                    }
+                    if (nextX >= (that.layoutWidth - that.width)) {
+                        nextX = that.layoutWidth - that.width;
+                    }
                     that.top = nextY;
                     that.left = nextX;
-                    let rowNum = Math.round(nextY / minY) + 1;
-                    let colNum = Math.round(nextX / minX) + 1;
-                    console.log(rowNum, colNum, row, col);
+                    // console.log(rowNum, colNum, row, col);
                     // bgDOM.style.gridRow = rowNum + ' / ' + (row[1] + rowNum - row[0]);
                     // bgDOM.style.gridColumn = colNum + ' / ' + (col[1] + colNum - col[0]);
                     // that.gridRow = rowNum + ' / ' + (row[1] + rowNum - row[0]);
@@ -133,14 +120,16 @@ export default {
                     that.position = 'static';
                     let rowNum = Math.round(that.top / minY) + 1;
                     let colNum = Math.round(that.left / minX) + 1;
-                    that.gridRow = rowNum + ' / ' + (row[1] + rowNum - row[0]);
-                    that.gridCol = colNum + ' / ' + (col[1] + colNum - col[0]);
-                    // bgDOM.className = 'drag-bg';
+                    that.gridRow = `${rowNum} / ${row[1] + rowNum - row[0]}`;
+                    that.gridCol = `${colNum} / ${col[1] + colNum - col[0]}`;
+                    console.log(row, col, rowNum, colNum);
+                    that.$bus.$emit('grid-drag-close-line');
                     document.onmousemove = document.onmouseup = null;
-                    // bgLine.style.backgroundSize = '';
-                    // bgLine1.style.backgroundSize = '';
                 }
             }
+        },
+        closeMove() {
+            this.isMove = !this.isMove;
         }
     }
 }
@@ -148,11 +137,18 @@ export default {
 
 <style scoped lang="less">
 .grid-drag-item {
-    padding: 10px;
     background: #00b89c;
+    z-index: 4;
+    user-select: none;
+    -webkit-user-drag: none;
     .content {
         height: 100%;
         width: 100%;
+        user-select: none;
+        -webkit-user-drag: none;
+        position: relative;
+        top: 20px;
+        left: 0;
         overflow: hidden;
         resize: both;
         border: 1px #000 solid;
